@@ -1,35 +1,83 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Home = () => {
-	const [pokemones, setPokemones] = useState([]);
+	const [nuevaTarea, setNuevaTarea] = useState("");
+	const [items, setItems] = useState([]);
+	function agregar() {
+		const item = {
+			id: Math.floor(Math.random() * 100),
+			value: nuevaTarea,
+		};
 
-	fetch("https://pokeapi.co/api/v2/pokemon")
-		.then((resp) => resp.json())//lo hace JSON
-		.then((response) => setPokemones(response.results)) //results=nombre del arreglo donde estan 
-		.catch();
+		setItems((listaVieja) => [...listaVieja, item]);
+		setNuevaTarea("");
+	}
+
+	function borrado(id) {
+		const listaNueva = items.filter((item) => item.id !== id);
+		setItems(listaNueva);
+	};
+	useEffect(() => {
+		//logica
+		fetch("https://assets.breatheco.de/apis/fake/todos/user/alonsogomez", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((resp) => {
+				
+				console.log(resp.status);
+				return resp.json();
+			})
+			.then((data) => {
+				setNuevaTarea(data);
+			})
+			.catch((error) => {
+				//manejo de errores
+				console.log(error);
+			});
+	}, []);
+
 	return (
 		<div>
-			<h1 className="text-center mt-5">Pokeapi_fetch</h1>
-			{pokemones.map((item, index) => (
-				<p key={index}>
-					<div className="card" style={{ width: "18rem" }}>
-						<img
-							className="card-img-top"
-							src="..."
-							alt="Card image cap"
-						/>
-						<div className="card-body">
-							<h5 className="card-title">{item.name}</h5>
-							<p className="card-text">Atrapalos Ya!!!</p>
-							<a href={item.url} class="btn btn-primary">
-								POKEBOLA
-							</a>
-						</div>
-					</div>
-				</p>
-			))}
+			<div className="card">
+				<h2 className="card-header">To_do List</h2>
+				<div className="card-body">
+					<h5 className="card-title">Guarda aca tu tarea</h5>
+					<input
+						type="text"
+						placeholder="Agregar Tarea"
+						value={nuevaTarea}
+						onChange={(e) => setNuevaTarea(e.target.value)}
+					/>
+
+					<button
+						type="button"
+						className="btn btn-success"
+						onClick={() => agregar()}>
+						Guardar
+					</button>
+					<ol>
+						{items.map((item) => {
+							return (
+								<li key={item.id}>
+									{item.value}{" "}
+									<button
+										type="button"
+										className="btn btn-danger"
+										onClick={() => borrado(item.id)}>
+										Borrar
+									</button>
+								</li>
+							);
+						})}
+					</ol>
+				</div>
+			</div>
 		</div>
 	);
 };
 
 export default Home;
+
